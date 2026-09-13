@@ -1,0 +1,7 @@
+,Fetal abdomen,Fetal brain,Fetal femur,Fetal thorax,Maternal cervix,Other
+Fetal abdomen,103,0,0,10,1,13
+Fetal brain,0,500,4,2,0,3
+Fetal femur,0,2,134,1,0,28
+Fetal thorax,25,1,0,209,2,24
+Maternal cervix,1,0,0,0,249,3
+Other,41,7,51,61,3,727
