@@ -20,12 +20,6 @@ model-index:
 
 This model was trained from scratch on an unknown dataset.
 It achieves the following results on the evaluation set:
-- Loss: 0.3715
-- Accuracy: 0.8824
-- Precision Macro: 0.8529
-- Recall Macro: 0.8867
-- F1 Macro: 0.8671
-=======
 - Loss: 0.2940
 - Accuracy: 0.9026
 - Precision Macro: 0.8742
