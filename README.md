@@ -12,6 +12,16 @@ metrics:
 - f1_score
 model-index:
 - name: FP_Classifcation-V1
+  results:
+  - task:
+      type: image-classification
+    dataset:
+      type: Marc-HealthAI/fetal-planes-classification-dataset-main
+      name: fetal-planes-classification-dataset-main
+    metrics:
+    - type: recall
+      value: 0.9098
+      name: Recall macro
 ---
 
 # FP_Classifcation-V1
