@@ -1,4 +1,3 @@
-
 ---
 library_name: PyTorch
 tags:
@@ -13,7 +12,6 @@ metrics:
 - f1_score
 model-index:
 - name: FP_Classifcation-V1
-  results: []
 ---
 
 # FP_Classifcation-V1
@@ -55,6 +53,8 @@ The following hyperparameters were used during training:
 - mixed_precision_training: Native AMP
 
 ### Training results
+| Training Loss | Epoch | Step  | Validation Loss | Accuracy | Precision Macro | Recall Macro | F1 Macro |
+|:-------------:|:-----:|:-----:|:---------------:|:--------:|:---------------:|:------------:|:--------:|
 | 1.0869        | 1.0   | 483   | 0.7657          | 0.6792   | 0.6837          | 0.7053       | 0.6710   |
 | 0.9801        | 2.0   | 966   | 0.7458          | 0.7507   | 0.7370          | 0.7004       | 0.7055   |
 | 0.9227        | 3.0   | 1449  | 0.6545          | 0.7143   | 0.7075          | 0.7831       | 0.6999   |
