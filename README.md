@@ -18,11 +18,13 @@ model-index:
 
 This model was trained from scratch on an unknown dataset.
 It achieves the following results on the evaluation set:
+<!-- START_EVAL_SUMMARY -->
 - Loss: 0.2940
 - Accuracy: 0.9026
 - Precision Macro: 0.8742
 - Recall Macro: 0.9098
 - F1 Macro: 0.8895
+<!-- END_EVAL_SUMMARY -->
 
 ## Model description
 
@@ -39,7 +41,7 @@ More information needed
 ## Training procedure
 
 ### Training hyperparameters
-
+<!-- START_TRAINING_RESULTS -->
 The following hyperparameters were used during training:
 - learning_rate: 0.001
 - train_batch_size: 4
@@ -94,6 +96,8 @@ The following hyperparameters were used during training:
 | 0.3631        | 37.0  | 17871 | 0.3186          | 0.9063   | 0.8841          | 0.9014       | 0.8920   |
 | 0.2681        | 38.0  | 18354 | 0.2929          | 0.9087   | 0.8841          | 0.9093       | 0.8951   |
 | 0.2766        | 39.0  | 18837 | 0.2944          | 0.9022   | 0.8793          | 0.9006       | 0.8890   |
+
+<!-- END_TRAINING_RESULTS -->
 
 ### Framework versions
 
