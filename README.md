@@ -1,19 +1,3 @@
----
-library_name: transformers
-tags:
-- maternal
-- fetal plane
-- classification
-- CNN
-metrics:
-- accuracy
-model-index:
-- name: FP_Classifcation-V1
-  results: []
----
-
-<!-- This model card has been generated automatically according to the information the Trainer had access to. You
-should probably proofread and complete it, then remove this comment. -->
 
 # FP_Classifcation-V1
 
