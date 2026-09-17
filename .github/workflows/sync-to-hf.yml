@@ -4,8 +4,8 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'scripts/configuration_fetal_plane.py'
-      - 'scripts/modeling_fetal_plane.py'
+      - 'Scripts/configuration_fetal_plane.py'
+      - 'Scripts/modeling_fetal_plane.py'
 
 jobs:
   sync-to-hf:
@@ -27,9 +27,9 @@ jobs:
       - name: Copy Custom Architecture Code
         run: |
           # Copy only the custom architecture files to the root of the HF repo
-          cp scripts/configuration_fetal_plane.py hf_repo/
-          cp scripts/modeling_fetal_plane.py hf_repo/
-          cp scripts/sample_model_inference.py hf_repo/
+          cp Scripts/configuration_fetal_plane.py hf_repo/
+          cp Scripts/modeling_fetal_plane.py hf_repo/
+          cp Scripts/sample_model_inference.py hf_repo/
 
       - name: Commit and Push to Hugging Face
         run: |
