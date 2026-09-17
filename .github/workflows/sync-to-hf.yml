@@ -34,7 +34,7 @@ jobs:
       - name: Commit and Push to Hugging Face
         run: |
           cd hf_repo
-          git add configuration_fetal_plane.py modeling_fetal_plane.py sample_model.inference.py
+          git add configuration_fetal_plane.py modeling_fetal_plane.py sample_model_inference.py
           # Only commit if there are changes
           git diff-index --quiet HEAD || git commit -m "Sync custom architecture code from GitHub"
           git push origin main
