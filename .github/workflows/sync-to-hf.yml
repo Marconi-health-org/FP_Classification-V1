@@ -1,12 +1,8 @@
-name: Sync Architecture Code to Hugging Face
+name: Sync to Hugging Face Hub
 
 on:
   push:
     branches: [ main, colab ]
-    paths:
-      - 'scripts/configuration_fetal_plane.py'
-      - 'scripts/modeling_fetal_plane.py'
-      - 'scripts/sample_model_inference.py'
   workflow_dispatch:
 
 jobs:
@@ -16,46 +12,53 @@ jobs:
       - name: Checkout GitHub Repository
         uses: actions/checkout@v4
 
-      - name: Clone Hugging Face Model Repo
-        env:
-          HF_TOKEN: ${{ secrets.HF_MARC }}
+      - name: Inspect Workspace Files
         run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
+          echo "=== Files present in GitHub checkout ==="
+          ls -la
+          find . -maxdepth 2 -not -path '*/.*'
 
-          # Skip large weights download
+      - name: Configure Git & Clone HF Model Repo
+        env:
+          HF_TOKEN: ${{ secrets.HF_MARC}}
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+          # Skip downloading large model weights to speed up clone
           export GIT_LFS_SKIP_SMUDGE=1
 
-          # Note the exact HF repository name: FP_Classifcation-V1
-          git clone https://user:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classifcation-V1 hf_repo
+          git clone https://Marc-HealthAI:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classifcation-V1 hf_repo
 
-      - name: Copy Custom Architecture Code
+      - name: Find & Copy Architecture Files
         run: |
-          # Handles both 'scripts' and 'Scripts' capitalization
-          if [ -d "scripts" ]; then
-            SRC_DIR="scripts"
-          elif [ -d "Scripts" ]; then
-            SRC_DIR="Scripts"
-          else
-            SRC_DIR="."
+          # Locate files dynamically anywhere in the workspace
+          CONFIG_FILE=$(find . -not -path "./hf_repo/*" -name "configuration_fetal_plane.py" | head -n 1)
+          MODEL_FILE=$(find . -not -path "./hf_repo/*" -name "modeling_fetal_plane.py" | head -n 1)
+
+          if [ -z "$CONFIG_FILE" ] || [ -z "$MODEL_FILE" ]; then
+            echo "::error::Could not find configuration_fetal_plane.py or modeling_fetal_plane.py in the repository!"
+            echo "Please ensure you have committed these files to GitHub."
+            exit 1
           fi
 
-          echo "Copying files from directory: $SRC_DIR"
-          cp -v $SRC_DIR/configuration_fetal_plane.py hf_repo/
-          cp -v $SRC_DIR/modeling_fetal_plane.py hf_repo/
-          cp -v $SRC_DIR/sample_model_inference.py hf_repo/ 2>/dev/null || true
+          echo "Found Config: $CONFIG_FILE"
+          echo "Found Model: $MODEL_FILE"
 
-      - name: Commit and Push to Hugging Face
+          cp -v "$CONFIG_FILE" hf_repo/configuration_fetal_plane.py
+          cp -v "$MODEL_FILE" hf_repo/modeling_fetal_plane.py
+
+      - name: Commit & Push to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_MARC }}
         run: |
           cd hf_repo
-          git add configuration_fetal_plane.py modeling_fetal_plane.py sample_model_inference.py 2>/dev/null || true
-
-          if ! git diff-index --quiet HEAD; then
-            git commit -m "Sync custom architecture code from GitHub [skip ci]"
-            git push origin main
-            echo "Successfully updated Hugging Face repository!"
+          git add configuration_fetal_plane.py modeling_fetal_plane.py
+          
+          if git status --porcelain | grep -q .; then
+            git commit -m "Auto-sync custom architecture from GitHub [skip ci]"
+            git push https://Marc-HealthAI:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classifcation-V1 main
+            echo "Successfully pushed updated architecture to Hugging Face!"
           else
-            echo "No changes detected. Hugging Face is already up to date."
+            echo "No changes detected; Hugging Face repo is already up-to-date."
           fi
