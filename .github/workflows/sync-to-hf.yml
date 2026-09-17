@@ -23,7 +23,7 @@ jobs:
           git config --global user.name "GitHub Action"
           
           # Clone the HF model repo into a temporary folder
-          git clone https://user:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classification-V1 hf_repo
+          git clone https://user:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classifcation-V1 hf_repo
 
       - name: Copy Custom Architecture Code
         run: |
