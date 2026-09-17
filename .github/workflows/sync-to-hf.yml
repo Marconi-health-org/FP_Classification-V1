@@ -2,63 +2,16 @@ name: Sync to Hugging Face Hub
 
 on:
   push:
-    branches: [ main, colab ]
-  workflow_dispatch:
+    branches: [main]
 
 jobs:
-  sync-to-hf:
+  sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout GitHub Repository
-        uses: actions/checkout@v4
-
-      - name: Inspect Workspace Files
-        run: |
-          echo "=== Files present in GitHub checkout ==="
-          ls -la
-          find . -maxdepth 2 -not -path '*/.*'
-
-      - name: Configure Git & Clone HF Model Repo
-        env:
-          HF_TOKEN: ${{ secrets.HF_MARC}}
-        run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-
-          # Skip downloading large model weights to speed up clone
-          export GIT_LFS_SKIP_SMUDGE=1
-
-          git clone https://Marc-HealthAI:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classifcation-V1 hf_repo
-
-      - name: Find & Copy Architecture Files
-        run: |
-          # Locate files dynamically anywhere in the workspace
-          CONFIG_FILE=$(find . -not -path "./hf_repo/*" -name "configuration_fetal_plane.py" | head -n 1)
-          MODEL_FILE=$(find . -not -path "./hf_repo/*" -name "modeling_fetal_plane.py" | head -n 1)
-
-          if [ -z "$CONFIG_FILE" ] || [ -z "$MODEL_FILE" ]; then
-            echo "::error::Could not find configuration_fetal_plane.py or modeling_fetal_plane.py in the repository!"
-            echo "Please ensure you have committed these files to GitHub."
-            exit 1
-          fi
-
-          echo "Found Config: $CONFIG_FILE"
-          echo "Found Model: $MODEL_FILE"
-
-          cp -v "$CONFIG_FILE" hf_repo/configuration_fetal_plane.py
-          cp -v "$MODEL_FILE" hf_repo/modeling_fetal_plane.py
-
-      - name: Commit & Push to Hugging Face
-        env:
-          HF_TOKEN: ${{ secrets.HF_MARC }}
-        run: |
-          cd hf_repo
-          git add configuration_fetal_plane.py modeling_fetal_plane.py
-          
-          if git status --porcelain | grep -q .; then
-            git commit -m "Auto-sync custom architecture from GitHub [skip ci]"
-            git push https://Marc-HealthAI:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classifcation-V1 main
-            echo "Successfully pushed updated architecture to Hugging Face!"
-          else
-            echo "No changes detected; Hugging Face repo is already up-to-date."
-          fi
+      - uses: actions/checkout@v4
+      - uses: huggingface/hub-sync@v0.1.0
+        with:
+          github_repo_id: ${{ github.repository }}
+          huggingface_repo_id: Marc-HealthAI/FP_Classifcation-V1
+          hf_token: ${{ secrets.HF_MARC }}
+          repo_type: model
