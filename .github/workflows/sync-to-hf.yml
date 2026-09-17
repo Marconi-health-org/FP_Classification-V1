@@ -1,9 +1,13 @@
-name: Sync to Hugging Face Hub
+name: Sync Architecture Code to Hugging Face
 
 on:
   push:
-    branches: [ main, colab ]  # Triggers on both main and colab branches
-  workflow_dispatch:            # Allows manual trigger from GitHub Actions tab
+    branches: [ main, colab ]
+    paths:
+      - 'scripts/configuration_fetal_plane.py'
+      - 'scripts/modeling_fetal_plane.py'
+      - 'scripts/sample_model_inference.py'
+  workflow_dispatch:
 
 jobs:
   sync-to-hf:
@@ -12,39 +16,46 @@ jobs:
       - name: Checkout GitHub Repository
         uses: actions/checkout@v4
 
-      - name: Configure Git & Clone HF Model Repo
+      - name: Clone Hugging Face Model Repo
         env:
           HF_TOKEN: ${{ secrets.HF_MARC }}
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
 
-          # Notice the exact spelling: FP_Classifcation-V1
-          git clone https://Marc-HealthAI:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classifcation-V1 hf_repo
+          # Skip large weights download
+          export GIT_LFS_SKIP_SMUDGE=1
 
-      - name: Copy Architecture Code & Config
+          # Note the exact HF repository name: FP_Classifcation-V1
+          git clone https://user:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classifcation-V1 hf_repo
+
+      - name: Copy Custom Architecture Code
         run: |
-          # Copy scripts if they exist in scripts/ or in root
+          # Handles both 'scripts' and 'Scripts' capitalization
           if [ -d "scripts" ]; then
-            cp -v scripts/configuration_fetal_plane.py hf_repo/ 2>/dev/null || true
-            cp -v scripts/modeling_fetal_plane.py hf_repo/ 2>/dev/null || true
+            SRC_DIR="scripts"
+          elif [ -d "Scripts" ]; then
+            SRC_DIR="Scripts"
           else
-            cp -v configuration_fetal_plane.py hf_repo/ 2>/dev/null || true
-            cp -v modeling_fetal_plane.py hf_repo/ 2>/dev/null || true
+            SRC_DIR="."
           fi
 
-      - name: Push to Hugging Face
+          echo "Copying files from directory: $SRC_DIR"
+          cp -v $SRC_DIR/configuration_fetal_plane.py hf_repo/
+          cp -v $SRC_DIR/modeling_fetal_plane.py hf_repo/
+          cp -v $SRC_DIR/sample_model_inference.py hf_repo/ 2>/dev/null || true
+
+      - name: Commit and Push to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_MARC }}
         run: |
           cd hf_repo
-          git add configuration_fetal_plane.py modeling_fetal_plane.py
-          
-          # Check if there are differences to commit
-          if git status --porcelain | grep -E 'configuration_fetal_plane.py|modeling_fetal_plane.py'; then
-            git commit -m "Auto-sync custom architecture from GitHub"
-            git push https://Marc-HealthAI:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classifcation-V1 main
-            echo "Successfully updated Hugging Face repo."
+          git add configuration_fetal_plane.py modeling_fetal_plane.py sample_model_inference.py 2>/dev/null || true
+
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "Sync custom architecture code from GitHub [skip ci]"
+            git push origin main
+            echo "Successfully updated Hugging Face repository!"
           else
-            echo "No changes detected between GitHub and Hugging Face."
+            echo "No changes detected. Hugging Face is already up to date."
           fi
