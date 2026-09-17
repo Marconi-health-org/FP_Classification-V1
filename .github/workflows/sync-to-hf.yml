@@ -6,6 +6,7 @@ on:
     paths:
       - 'Scripts/configuration_fetal_plane.py'
       - 'Scripts/modeling_fetal_plane.py'
+      - 'Scripts/sample_model_inference.py'
 
 jobs:
   sync-to-hf:
