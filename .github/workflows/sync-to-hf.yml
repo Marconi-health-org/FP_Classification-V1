@@ -1,17 +1,40 @@
-name: Sync to Hugging Face Hub
+name: Sync Architecture Code to Hugging Face
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
+    paths:
+      - 'scripts/configuration_fetal_plane.py'
+      - 'scripts/modeling_fetal_plane.py'
 
 jobs:
-  sync:
+  sync-to-hf:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: huggingface/hub-sync@v0.1.0
-        with:
-          github_repo_id: ${{ github.repository }}
-          huggingface_repo_id: Marc-HealthAI/FP_Classifcation-V1
-          hf_token: ${{ secrets.HF_MARC }}
-          repo_type: model
+      - name: Checkout GitHub Repository
+        uses: actions/checkout@v4
+
+      - name: Clone Hugging Face Model Repo
+        env:
+          HF_TOKEN: ${{ secrets.HF_MARC }}
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          
+          # Clone the HF model repo into a temporary folder
+          git clone https://user:$HF_TOKEN@huggingface.co/Marc-HealthAI/FP_Classification-V1 hf_repo
+
+      - name: Copy Custom Architecture Code
+        run: |
+          # Copy only the custom architecture files to the root of the HF repo
+          cp scripts/configuration_fetal_plane.py hf_repo/
+          cp scripts/modeling_fetal_plane.py hf_repo/
+          cp scripts/sample_model_inference.py hf_repo/
+
+      - name: Commit and Push to Hugging Face
+        run: |
+          cd hf_repo
+          git add configuration_fetal_plane.py modeling_fetal_plane.py sample_model.inference.py
+          # Only commit if there are changes
+          git diff-index --quiet HEAD || git commit -m "Sync custom architecture code from GitHub"
+          git push origin main
